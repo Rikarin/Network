@@ -8,7 +8,7 @@ namespace Rikarin.Network.ServiceBus.Kafka {
     // Kafka Consumer (1 group, 1 topic)
     internal class KafkaGroupManager {
         readonly IConsumer<Ignore, string> _consumer;
-        readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        readonly CancellationTokenSource _cancellationTokenSource = new();
         readonly KafkaServiceBus _serviceBus;
 
         public Type Group { get; }
@@ -52,13 +52,13 @@ namespace Rikarin.Network.ServiceBus.Kafka {
                         Console.WriteLine("consuming...");
                         var result = _consumer.Consume(cancellationToken);
                         Console.WriteLine("yummi yummi");
-                        var message = (ICommand)JsonConvert.DeserializeObject(result.Value, _serviceBus.JsonSerializerSettings);
+                        var message = (ICommand)JsonConvert.DeserializeObject(result.Message.Value, _serviceBus.JsonSerializerSettings);
 
                         if (message == null) {
                             throw new Exception("Message base type is not ICommand");
                         }
 
-                        System.Console.WriteLine($"consumed message {result.Value}");
+                        System.Console.WriteLine($"consumed message {result.Message.Value}");
                         
                         _serviceBus.HandleMessage(message);
                         _consumer.Commit();
